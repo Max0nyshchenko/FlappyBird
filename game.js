@@ -4,6 +4,11 @@ const ctx = cvs.getContext('2d');
 
 // VARS
 let frames = 0;
+const DEGREE = Math.PI/180;
+
+// LOAD SPRITE IMAGE
+const sprite = new Image();
+sprite.src = 'img/litsprite.png';
 
 // GAME STATE OBJ
 const state = {
@@ -15,18 +20,19 @@ const state = {
 
 // GAME STATE LISTENER
 
-document.addEventListener('click', function(e){
+cvs.addEventListener('click', function(e){
     switch(state.current){
-        case state.getReady
+        case state.getReady:
+            state.current = state.getReady;
+            break;
+        case state.game:
+            bird.flap();
+            break;
+        case state.gameOver:
+            state.current = state.getReady;
+            break;
     }
 })
-
-
-// LOAD SPRITE IMAGE
-const sprite = new Image();
-sprite.src = 'img/litsprite.png';
-
-
 
 // BACKGROUND
 
@@ -53,11 +59,18 @@ const fg = {
     h:112,
     x:0,
     y:cvs.height - 112,
+    dx: 2,
     draw: function(){
         ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y,
             this.w, this.h);
         ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x + this.w, this.y,
             this.w, this.h);
+    },
+
+    update: function(){
+        if(state.current == state.game){
+            this.x = (this.x - this.dx)%(this.w/2);
+        }
     }
 }
 // BIRD
@@ -65,7 +78,7 @@ const bird = {
     animation: [
         {sX: 276,sY:112},
         {sX: 276,sY:139},
-        {sX: 276,sY:164},
+        {sX: 276,sY:166},
         {sX: 276,sY:139}
     ],
     x: 50,
@@ -75,10 +88,53 @@ const bird = {
 
     frame: 0,
 
+    gravity: 0.25,
+    jump: 4.6,
+    speed: 0,
+    rotation: 0,
+
+
     draw: function(){
         let bird = this.animation[this.frame];
-        ctx.drawImage(sprite, bird.sX, bird.sY, this.w, this.h, this.x - this.w/2, this.y - this.h/2,
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+
+        ctx.drawImage(sprite, bird.sX, bird.sY, this.w, this.h,  - this.w/2, -this.h/2,
         this.w, this.h);
+
+        ctx.restore();
+    },
+    flap: function(){
+        this.speed = - this.jump; 
+    },
+    update: function(){
+        this.period = state.current == state.getReady ? 10 : 5;
+        this.frame += frames%this.period == 0 ? 1 : 0;
+        this.frame = this.frame%this.animation.length;
+
+        if(state.current == state.getReady) {
+            this.y = 150;
+            this.rotation = 0 * DEGREE;
+        }else{
+            this.speed += this.gravity;
+            this.y += this.speed;
+
+            if(this.y + this.h/2 >= cvs.height  - fg.h){
+                this.y = cvs.height-fg.h-this.h/2;
+                if(state.current == state.game){
+                    state.current = state.gameOver;
+                }
+            }
+
+            if(this.speed >= this.jump){
+                this.rotation = 90 * DEGREE;
+                this.frame = 1;
+            } else {
+                this.rotation = -25 * DEGREE;
+            }
+        }
     }
 }
 
@@ -92,8 +148,9 @@ const getReady = {
     y: 80,
 
     draw: function(){
-        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y,
-            this.w, this.h);
+        if(state.current == state.getReady){
+            ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+        }
     }
 
 }
@@ -108,10 +165,58 @@ const gameOver = {
     y:90,
 
     draw: function () {
-        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y,
-            this.w, this.h);
+        if(state.current == state.gameOver){
+            ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y,this.w, this.h);
+        }       
     }
 
+}
+
+// PIPES
+const pipes = {
+    position: [],
+    top: {
+        sX: 553,
+        sY:0
+    },
+    bottom: {
+        sX:502,
+        sY:0
+    },
+    w: 53,
+    h: 400,
+    gap: 85,
+    maxYPos: -150,
+    dx: 2,
+
+    draw: function(){
+        for(let i = 0; i < this.position.length; i++){
+            let p = this.position[i];
+
+            let topYPos = p.y;
+            let bottomYPos = p.y + this.gap + this.h;
+
+            ctx.drawImage(sprite, this.top.sX, this.top.sY, this.w, this.h, this.x, topYPos, this.w, this.h);
+
+            ctx.drawImage(sprite, this.bottom.sX, this.bottom.sY, this.w, this.h, this.x, bottomYPos, this.w, this.h);
+        }
+    },
+
+    update: function(){
+        if(state.current !== state.game)return;
+
+        if(frames%100 == 0) {
+            this.position.push({
+                x: cvs.width,
+                y: this.maxYPos * (Math.random() + 1 )
+            });
+        }
+        for(let i = 0; i < this.position.length; i++){
+            let p = this.position[i];
+
+            p.x -= this.dx;
+        }
+    }
 }
 
 
@@ -128,7 +233,8 @@ function draw(){
 
 // UPDATE
 function update(){
-
+    bird.update();
+    fg.update();
 }
 
 // LOOP
