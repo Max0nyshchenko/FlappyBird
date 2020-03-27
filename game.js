@@ -85,6 +85,7 @@ const bird = {
     y: 150,
     w:34,
     h:26,
+    radius: 12,
 
     frame: 0,
 
@@ -196,9 +197,9 @@ const pipes = {
             let topYPos = p.y;
             let bottomYPos = p.y + this.gap + this.h;
 
-            ctx.drawImage(sprite, this.top.sX, this.top.sY, this.w, this.h, this.x, topYPos, this.w, this.h);
+            ctx.drawImage(sprite, this.top.sX, this.top.sY, this.w, this.h, p.x, topYPos, this.w, this.h);
 
-            ctx.drawImage(sprite, this.bottom.sX, this.bottom.sY, this.w, this.h, this.x, bottomYPos, this.w, this.h);
+            ctx.drawImage(sprite, this.bottom.sX, this.bottom.sY, this.w, this.h, p.x, bottomYPos, this.w, this.h);
         }
     },
 
@@ -214,9 +215,41 @@ const pipes = {
         for(let i = 0; i < this.position.length; i++){
             let p = this.position[i];
 
+            
+            let bottomPipeYPos = p.y + this.h + this.gap;
+
+            if(bird.x + bird.radius>p.x && bird.x+bird.radius<p.x+this.w && 
+                bird.y + bird.radius>p.y && bird.y-bird.radius<p.y+this.h){
+                    state.current == state.gameOver
+                }
+            if(bird.x + bird.radius>p.x && bird.x+bird.radius<p.x+this.w && 
+                bird.y + bird.radius>bottomPipeYPos && bird.y-bird.radius<bottomPipeYPos+this.h){
+                    state.current == state.gameOver
+                }
+
             p.x -= this.dx;
+
+            if (p.x+this.w <= 0) {
+                this.position.shift();
+            }
         }
     }
+}
+
+const score = {
+    best:parseInt(localStorage.getItem('best')) || 0,
+    value: 0,
+
+    draw: function(){
+        ctx.fillStyle = '#FFF';
+
+        if(state.current == state.game) {
+            ctx.lineWidth = 2;
+        }else if(state.current == state.gameOver){
+
+        }
+    }
+
 }
 
 
@@ -225,6 +258,7 @@ function draw(){
     ctx.fillStyle = "#70c5ce";
     ctx.fillRect(0,0, cvs.width, cvs.height);
     bg.draw();
+    pipes.draw();
     fg.draw();
     bird.draw();
     getReady.draw();
@@ -235,6 +269,7 @@ function draw(){
 function update(){
     bird.update();
     fg.update();
+    pipes.update();
 }
 
 // LOOP
