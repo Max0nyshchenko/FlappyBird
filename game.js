@@ -218,11 +218,11 @@ const pipes = {
             
             let bottomPipeYPos = p.y + this.h + this.gap;
 
-            if(bird.x + bird.radius>p.x && bird.x+bird.radius<p.x+this.w && 
+            if(bird.x + bird.radius>p.x && bird.x-bird.radius<p.x+this.w && 
                 bird.y + bird.radius>p.y && bird.y-bird.radius<p.y+this.h){
                     state.current == state.gameOver
                 }
-            if(bird.x + bird.radius>p.x && bird.x+bird.radius<p.x+this.w && 
+            if(bird.x + bird.radius>p.x && bird.x-bird.radius<p.x+this.w && 
                 bird.y + bird.radius>bottomPipeYPos && bird.y-bird.radius<bottomPipeYPos+this.h){
                     state.current == state.gameOver
                 }
