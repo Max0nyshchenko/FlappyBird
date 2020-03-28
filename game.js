@@ -70,6 +70,33 @@ cvs.addEventListener('click', function(e){
     }
 })
 
+document.addEventListener('keydown', function(k){
+    if(state.current == state.getReady){
+        if(k.keyCode == 13) {
+            state.current = state.game;
+            swooshing_s.play();
+        }
+    }
+    if(state.current == state.gameOver){
+        if (k.keyCode == 13) {
+            pipes.reset();
+            bird.speedReset();
+            score.reset();
+            state.current = state.getReady;
+        }
+    }  
+})
+
+document.addEventListener("keydown", function (event) {
+    if(state.current == state.game){
+        if (event.keyCode == 32) {
+            bird.flap();
+            flap_s.play();
+        }
+    }
+    
+})
+
 // BACKGROUND
 
 const bg = {
