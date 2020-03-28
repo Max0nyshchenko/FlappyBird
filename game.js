@@ -313,6 +313,31 @@ const pipes = {
     }
 }
 
+const controls = {
+    value: 'Press Enter to Start',
+    value2: 'Press Spacebar to Flap',
+
+    draw: function(){
+        ctx.fillStyle = '#FFF';
+        ctx.strokeStyle = '#000';
+
+        if (state.current == state.getReady) {
+            ctx.lineWidth = 1.7;
+            ctx.font = '25px "Bungee Inline"';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.value, cvs.width/2, 50);
+            ctx.strokeText(this.value, cvs.width/2, 50);
+        }
+        if(state.current == state.getReady){
+            ctx.lineWidth = 1.5;
+            ctx.font = '22px "Bungee Inline"';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.value2, cvs.width / 2, 450);
+            ctx.strokeText(this.value2, cvs.width / 2, 450);
+        }
+    }
+}
+
 const score = {
     best:parseInt(localStorage.getItem('best')) || 0,
     value: 0,
@@ -355,6 +380,7 @@ function draw(){
     getReady.draw();
     gameOver.draw();
     score.draw();
+    controls.draw();
 }
 
 // UPDATE

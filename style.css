@@ -8,3 +8,13 @@ canvas {
     display: block;
     margin: 0 auto;
 }
+
+body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background: linear-gradient(to bottom, rgb(85, 154, 194), rgb(204, 132, 49));
+    background-image: url(img/bg.png);
+    background-position: center;
+    background-size: cover;
+}
