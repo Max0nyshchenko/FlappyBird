@@ -10,6 +10,22 @@ const DEGREE = Math.PI/180;
 const sprite = new Image();
 sprite.src = 'img/litsprite.png';
 
+// LOAD SOUNDS
+const score_s = new Audio();
+score_s.src = 'audio/sfx_point.wav';
+
+const die_s = new Audio();
+die_s.src = 'audio/sfx_die.wav';
+
+const flap_s = new Audio();
+flap_s.src = 'audio/sfx_flap.wav';
+
+const hit_s = new Audio();
+hit_s.src = 'audio/sfx_hit.wav';
+
+const swooshing_s = new Audio();
+swooshing_s.src = 'audio/sfx_swooshing.wav';
+
 // GAME STATE OBJ
 const state = {
     current: 0,
@@ -18,18 +34,38 @@ const state = {
     gameOver: 2
 }
 
+// START BTN
+const startBtn = {
+    x: 120,
+    y:263,
+    w:83,
+    h: 29
+}
+
 // GAME STATE LISTENER
 
 cvs.addEventListener('click', function(e){
     switch(state.current){
         case state.getReady:
             state.current = state.game;
+            swooshing_s.play();
             break;
         case state.game:
             bird.flap();
+            flap_s.play();
             break;
         case state.gameOver:
-            state.current = state.getReady;
+            let rect = cvs.getBoundingClientRect();
+            let clickX = e.clientX - rect.left;
+            let clickY = e.clientY - rect.top;
+
+            if( clickX >= startBtn.x && clickX <= startBtn.x + startBtn.w &&
+                clickY >= startBtn.y && clickY <= startBtn.y + startBtn.h){
+                    pipes.reset();
+                    bird.speedReset();
+                    score.reset();
+                    state.current = state.getReady;
+                }
             break;
     }
 })
@@ -126,6 +162,7 @@ const bird = {
                 this.y = cvs.height-fg.h-this.h/2;
                 if(state.current == state.game){
                     state.current = state.gameOver;
+                    die_s.play();
                 }
             }
 
@@ -136,6 +173,9 @@ const bird = {
                 this.rotation = -25 * DEGREE;
             }
         }
+    },
+    speedReset: function(){
+        this.speed = 0;
     }
 }
 
@@ -220,11 +260,13 @@ const pipes = {
 
             if(bird.x + bird.radius>p.x && bird.x-bird.radius<p.x+this.w && 
                 bird.y + bird.radius>p.y && bird.y-bird.radius<p.y+this.h){
-                    state.current = state.gameOver
+                    state.current = state.gameOver;
+                    hit_s.play();
                 }
             if(bird.x + bird.radius>p.x && bird.x-bird.radius<p.x+this.w && 
                 bird.y + bird.radius>bottomPipeYPos && bird.y-bird.radius<bottomPipeYPos+this.h){
-                    state.current = state.gameOver
+                    state.current = state.gameOver;
+                    hit_s.play();
                 }
 
             p.x -= this.dx;
@@ -232,11 +274,15 @@ const pipes = {
             if (p.x+this.w <= 0) {
                 this.position.shift();
                 score.value+=1;
+                score_s.play();
 
                 score.best = Math.max(score.value, score.best);
                 localStorage.setItem('best', score.best);
             }
         }
+    },
+    reset: function(){
+        this.position = [];
     }
 }
 
@@ -262,6 +308,10 @@ const score = {
             ctx.fillText(this.best, 225,228);
             ctx.strokeText(this.best, 225,228);
         }
+    },
+
+    reset: function(){
+        this.value = 0;
     }
 
 }
